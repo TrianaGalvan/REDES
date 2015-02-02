@@ -2,6 +2,7 @@
 
 typedef short u_int16_t;
 typedef int u_int32_t;
+typedef char u_int8_t;
 
 //opcodes 
 #define OPCODE_RRQ   1
@@ -18,6 +19,42 @@ typedef int u_int32_t;
 /* Timeout in seconds */
 #define TFTP_TIMEOUT 2
 
-struct RRQ{
-	u_in	
-}typedef RRQ;
+//estructura genérica de formato de tftp 
+struct TFTP_FORMATO{
+	u_int16_t opcode;
+	char data[30]; 	
+} typedef TFTP_FORMATO;
+
+//Estructura de la trmaa padre a enviar 
+struct Datagrama{
+	char tid; 
+	TFTP_FORMATO formato;	
+}typedef Datagrama;
+
+//Paquete  RRQ_WRQ
+struct RRQ_WRQ{
+	u_int16_t opcode;
+	char *fileName;
+	char* mode;
+}typedef RRQ_WRQ;
+
+//paquete data 
+struct DATA{
+	u_int16_t opcode;
+	u_int16_t blockNum;
+	char* msg;
+} typedef DATA;
+
+//Paquete ACK 
+struct ACK{
+	u_int16_t opcode;
+	u_int16_t blockNum;	
+}typedef ACK;
+
+//Paquete de error
+struct ERROR{
+	u_int16_t opcode;
+	u_int16_t errorCode;
+	char* errosMsg;
+	u_int8_t relleno;
+}typedef ERROR;

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "canal.h"
+#include "tftp.h"
 void recibirArchivo(char direccion);
 void copiarArch(char*,int,FILE*);
 int filtroDireccion(char dirA,char dirT);
@@ -11,7 +12,7 @@ int main(int argc, char *argv[])
 	int tam,leidos,contador=200;
 	FILE* pFile;
 	char nombre[50];
-	char dir;
+	char dir,*bufer;
 	//verificamos que el numero de argumentos sea correcto
 	if(argc <= 1){
 		printf("Parámetros incompletos");
@@ -22,6 +23,8 @@ int main(int argc, char *argv[])
 	dir = argv[1][0];
 	
 	inicializar();
+	
+	
 	recibirArchivo(dir);
 
 	terminar(); 
@@ -42,11 +45,10 @@ void recibirArchivo(char direccion){
 	int tam=0,abrirArch=0;
 	char aux[1000];
 	signed long bytes=0;
+	int opcode;
 	//Apertura del archivo 
 	FILE* dFile;
-	
-	
-	
+		
     dFile = fopen("archivoRecibido.bmp","wb");
 	if(dFile){
 		abrirArch = 1;	
@@ -62,6 +64,22 @@ void recibirArchivo(char direccion){
 		tam=sizeof(bufer);
 		rx(bufer,&tam);
 		
+		//verificar el opcode
+		opcode = (int)bufer[0];
+		
+		switch(opcode){
+			case OPCODE_ACK:
+				break;
+			case OPCODE_DATA:
+				break;
+			case OPCODE_ERR:
+				break;
+			case OPCODE_RRQ:
+				break; 
+			case OPCODE_WRQ:
+				
+				break;
+		}
 		if(tam !=0){
 			tam += (bufer[0]=='f')? 0 : 14;
 			printf("tam-2 = %d\n",tam-2);

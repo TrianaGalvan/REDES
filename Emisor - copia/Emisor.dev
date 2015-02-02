@@ -1,7 +1,7 @@
 [Project]
-FileName=pruebacanal.dev
+FileName=Emisor.dev
 Name=pruebacanal
-UnitCount=1
+UnitCount=3
 Type=1
 Ver=2
 ObjFiles=
@@ -26,7 +26,7 @@ UseCustomMakefile=0
 CustomMakefile=
 IncludeVersionInfo=0
 SupportXPThemes=0
-CompilerSet=3
+CompilerSet=0
 CompilerSettings=0000000100000000001000000
 LogOutput=
 LogOutputEnabled=0
@@ -50,8 +50,28 @@ ProductVersion=
 AutoIncBuildNr=0
 SyncProduct=0
 
+[Unit3]
+FileName=main.c
+CompileCpp=1
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit2]
+FileName=tftp.h
+CompileCpp=1
+Folder=pruebacanal
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
 [Unit1]
-FileName=main.cpp
+FileName=..\..\..\Programa_prac1\Emisor - copia\canal.h
 CompileCpp=1
 Folder=pruebacanal
 Compile=1
