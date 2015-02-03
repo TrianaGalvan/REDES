@@ -6,7 +6,8 @@ function triana_proto.dissector(buffer,pinfo,tree)
     pinfo.cols.protocol = "Triana"
     
 	local subtree = tree:add(triana_proto,buffer(),"Datos del Protocolo Triana")
-    subtree:add(buffer(1,1),"Direccion: " ..buffer(1,1):string())
+    subtree:add(buffer(0,1), "Direccion: " .. buffer(0,1):string())
+    subtree:add(buffer(1,1), "OpCode: " .. buffer(1,1))
 	
 	-- Obtener el tamaño reportado por wirechark
 	--local pktlen = buffer:reported_length_remaining()
