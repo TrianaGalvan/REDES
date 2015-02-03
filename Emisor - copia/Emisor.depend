@@ -1,0 +1,13 @@
+# depslib dependency file v1.0
+1422925338 source:c:\users\eduardo\documents\triana\redesrepo\redes\emisor - copia\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"canal.h"
+	"tftp.h"
+	<errno.h>
+
+1422923145 c:\users\eduardo\documents\triana\redesrepo\redes\emisor - copia\canal.h
+
+1422923145 c:\users\eduardo\documents\triana\redesrepo\redes\emisor - copia\tftp.h
+
