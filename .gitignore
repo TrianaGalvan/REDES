@@ -219,3 +219,7 @@ pip-log.txt
 *.o
 .objs/
 *.exe
+
+#Dev C
+.layout
+.win
