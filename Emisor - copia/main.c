@@ -1,20 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <windows.h>
 #include "canal.h"
 #include "tftp.h"
 #include <errno.h>
 
+#define TAM_BUF 50
+
 int mandarArchivo(char* nombre_archivo,char direccion);
-void enviarPeticionConexion(char*,char);
 char* structToArray(Datagrama*);
+void iniciar_timeOut();
+void enviarRRQ_WRQ(char ,char*);
+// Se acabó el tiempo del timer.
+volatile int timeOut = 0;
+
+
+// Función que ejecuta el timer - en otro Hilo
+DWORD WINAPI ThreadFunc(void* data);
 
 int main(int argc, char *argv[])
 {
 	char nombre[50];
-
+	int tam; 
+	int respuestaRecibida;
 	char *paquete;
-
+	char bufer[TAM_BUF];
 	char dir;
 
 	//verificamos si el numero de argumentos es correcto
@@ -25,38 +36,37 @@ int main(int argc, char *argv[])
 	}
 	//obteniendo parametros
 	strcpy(nombre,argv[2]);
-
 	dir = argv[1][0];
-
-	//pedir memoria para la estructura genérica
-	Datagrama *datagrama = (Datagrama*) calloc(1,sizeof(Datagrama));
-
-	//Direccion(tid)
-	datagrama->tid = dir;
-	datagrama->formato.opcode = OPCODE_WRQ;
-
-	//bajando una capa (tftp)
-	RRQ_WRQ *wrq_rrq = (RRQ_WRQ*) &(datagrama->formato);
-
-	//Llenando el wrq_rrq
-	wrq_rrq->fileName = (char*)malloc(sizeof(char)*strlen(nombre));
-	strcpy(wrq_rrq->fileName, nombre);
-
-	wrq_rrq->mode = (char*)malloc(sizeof(char)*strlen(MODE_NETASCII));
-	strcpy(wrq_rrq->mode, MODE_NETASCII);
-
-	//Convertir la estructura en un arreglo
-	paquete = structToArray(datagrama);
-
+	
     inicializar();
-
-	tx(paquete,100);
-
+	
+	enviarRRQ_WRQ(dir,nombre);
+	iniciar_timeOut();
+	while(1){
+		tam  = sizeof(bufer);
+		rx(bufer,&tam);
+		
+		if(tam > 0){
+			printf("tam = %d  bufer = %s\n",tam,bufer);
+			imprimir(bufer,tam);
+			respuestaRecibida = 1;
+			break;
+		}
+		else if(timeOut == 1){
+			printf("timeout expiró\n");
+			break;
+		}
+	
+	}
 	terminar();
 
 	return 0;
 }
 
+void iniciar_timeOut(){
+	// Iniciar el hilo para empezar a contar los 2 segundos	.	
+	HANDLE thread = CreateThread(NULL, 0, ThreadFunc, NULL, 0, NULL);
+}
 //pasar mi estructura a un arreglo
 char* structToArray(Datagrama* datagrama){
 	//pedir memoria para mi arreglo
@@ -99,12 +109,6 @@ char* structToArray(Datagrama* datagrama){
 	return trama;
 }
 
-//si rgeresa uno es que se logro la conexión si es 0 fallo la conexion
-void enviarPeticionConexion(char *nombre,char dir){
-	//char* peticion;
-	//int respuesta;
-
-}
 
 //si regresa 1 se mando bien el archivo si regresa 0 hubo error en la lectura.
 int mandarArchivo(char* nomA,char dir){
@@ -164,5 +168,39 @@ int mandarArchivo(char* nomA,char dir){
 	}//while
 
     return 0;
+
+}
+
+DWORD WINAPI ThreadFunc(void* data){	
+		printf("Hola desde el hilo\n");
+		Sleep(5000);
+		// Pedir permisos sobre timeOut;
+		timeOut = 1;
+		return 0;
+}
+
+void enviarRRQ_WRQ(char direccion ,char* nombreArchivo){
+	char* paquete;
+	//pedir memoria para la estructura genérica
+	Datagrama *datagrama = (Datagrama*) calloc(1,sizeof(Datagrama));
+
+	//Direccion(tid)
+	datagrama->tid = direccion;
+	datagrama->formato.opcode = OPCODE_WRQ;
+
+	//bajando una capa (tftp)
+	RRQ_WRQ *wrq_rrq = (RRQ_WRQ*) &(datagrama->formato);
+
+	//Llenando el wrq_rrq
+	wrq_rrq->fileName = (char*)malloc(sizeof(char)*strlen(nombreArchivo));
+	strcpy(wrq_rrq->fileName, nombreArchivo);
+
+	wrq_rrq->mode = (char*)malloc(sizeof(char)*strlen(MODE_NETASCII));
+	strcpy(wrq_rrq->mode, MODE_NETASCII);
+
+	//Convertir la estructura en un arreglo
+	paquete = structToArray(datagrama);
+	
+	tx(paquete,100);
 
 }

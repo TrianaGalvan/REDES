@@ -3,16 +3,20 @@
 #include <string.h>
 #include "canal.h"
 #include "tftp.h"
+int contACK = 0;
 void recibirArchivo(char direccion);
 void copiarArch(char*,int,FILE*);
 int filtroDireccion(char dirA,char dirT);
+void enviarACK(int,char );
+int  structToArray(Datagrama*,char**);
 int main(int argc, char *argv[])
 {
 
-	int tam,leidos,contador=200;
+	int leidos,contador=200;
 	FILE* pFile;
 	char nombre[50];
-	char dir,*bufer;
+	char dir,bufer[500];
+	int tam;
 	//verificamos que el numero de argumentos sea correcto
 	if(argc <= 1){
 		printf("Parámetros incompletos");
@@ -24,8 +28,19 @@ int main(int argc, char *argv[])
 	
 	inicializar();
 	
-	
-	recibirArchivo(dir);
+	enviarACK(contACK,dir);
+	while(1){
+		tam = sizeof(bufer);	
+		 rx(bufer,&tam);			
+
+		if(tam > 0){
+			printf("tam = %d  bufer = %s\n",tam,bufer);
+			imprimir(bufer,tam);
+			break;
+		}
+	}
+		
+//	recibirArchivo(dir);
 
 	terminar(); 
     system("PAUSE");
@@ -39,6 +54,61 @@ int filtroDireccion(char dirA,char dirT){
 	}
 	return 0;
 }
+
+//pasar mi estructura a un arreglo
+int structToArray(Datagrama* datagrama,char** trama){
+	//pedir memoria para mi arreglo
+	RRQ_WRQ *wrq;
+	int numBytes = 0;
+	int indice; 
+	
+	*trama = (char*)calloc(1,sizeof(Datagrama));
+
+
+	if(*trama == NULL){
+		perror("Error malloc");
+		printf("\nbien despues de calloc\n");
+	}
+	printf("\ntrama despues del if= %p\n",trama);
+	//direccion
+	*trama[0] = datagrama->tid;
+	numBytes++;	
+	//opcode
+	*trama[1] = (char)datagrama->formato.opcode;
+	numBytes++;
+	
+	switch(*trama[1]){
+		case OPCODE_DATA:
+			break;
+		case OPCODE_ERR:
+			break;
+		case OPCODE_RRQ:
+			break;
+		case OPCODE_WRQ:
+			wrq = (RRQ_WRQ*) &(datagrama->formato);
+			indice = 2;	
+			memcpy((*trama)+indice,wrq->fileName,strlen(wrq->fileName));
+			numBytes += strlen(wrq->fileName);
+			
+			indice += strlen(wrq->fileName)+1; 
+			*trama[indice] = 0;
+			numBytes++;
+			
+			indice += 1;
+			memcpy((*trama)+indice, wrq->mode, strlen(wrq->mode));
+			numBytes += strlen(wrq->mode);
+	
+			indice+= strlen(wrq->mode)+1;
+			*trama[indice] = 0;
+			
+			break;
+		case OPCODE_ACK:
+			break;
+	}
+
+	return numBytes;
+}
+
 
 void recibirArchivo(char direccion){
 	char bufer[1002];
@@ -115,4 +185,27 @@ void copiarArch(char* datos,int leidos,FILE* dFile){
 	 
 	 fwrite(datos,1,leidos,dFile);	
 	 
+}
+
+void enviarACK(int num,char direccion){
+	char* paquete;
+	int tam = 0; 
+	//pedir memoria para la estructura genérica
+	Datagrama *datagrama = (Datagrama*) calloc(1,sizeof(Datagrama));
+
+	//Direccion(tid)
+	datagrama->tid = direccion;
+	datagrama->formato.opcode = OPCODE_ACK;
+
+	//bajando una capa (tftp)
+	ACK *ack = (ACK*) &(datagrama->formato);
+
+	//Llenando el ack
+	ack->blockNum = num;
+	
+	//Convertir la estructura en un arreglo
+	tam = structToArray(datagrama,&paquete);
+	
+	tx(paquete,tam);
+	
 }

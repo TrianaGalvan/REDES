@@ -52,9 +52,9 @@ struct ACK{
 }typedef ACK;
 
 //Paquete de error
-struct ERROR{
+struct ERROR_TRAMA{
 	u_int16_t opcode;
 	u_int16_t errorCode;
 	char* errosMsg;
 	u_int8_t relleno;
-}typedef ERROR;
+}typedef ERROR_TRAMA;
