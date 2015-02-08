@@ -221,5 +221,5 @@ pip-log.txt
 *.exe
 
 #Dev C
-.layout
-.win
+*.layout
+*.win

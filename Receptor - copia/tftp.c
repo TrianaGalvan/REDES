@@ -5,6 +5,7 @@
 #include "tftp.h"
 #include "canal.h"
 
+
 //pasar mi estructura a un arreglo
 int structToArray(Datagrama* datagrama,char** trama){
 	//pedir memoria para mi arreglo
@@ -130,6 +131,64 @@ void enviarRRQ(char direccion ,char* nombreArchivo){
 	rrq->mode = (char*)malloc(sizeof(char)*strlen(MODE_NETASCII));
 	strcpy(rrq->mode, MODE_NETASCII);
 
+	//Convertir la estructura en un arreglo
+	bytesAEnviar = structToArray(datagrama,&paquete);
+	
+	tx(paquete,bytesAEnviar);
+
+}
+
+void enviarERROR(int errorCode,char* error,char dir){
+	char* paquete;
+	int bytesAEnviar;
+	
+	//pedir memoria para la estructura genérica
+	Datagrama *datagrama = (Datagrama*) calloc(1,sizeof(Datagrama));
+		
+	//Direccion(tid)
+	datagrama->tid = dir;
+	datagrama->formato.opcode = OPCODE_ERR;
+	
+	//bajando una capa (tftp)
+	ERROR_TRAMA *err = (ERROR_TRAMA*) &(datagrama->formato);
+	
+	//copiando codigo de error
+	err->errorCode = errorCode;
+	
+	//copiando el mensaje de error
+    err->errosMsg = (char*) malloc(sizeof(char)*strlen(error));
+	strcpy(err->errosMsg,error);
+	
+	err->relleno = 0;
+	
+	//Convertir la estructura en un arreglo
+	bytesAEnviar = structToArray(datagrama,&paquete);
+	
+	tx(paquete,bytesAEnviar);
+
+}
+
+void enviarDATA(int numB,char* informacion,char dir){
+	char* paquete;
+	int bytesAEnviar;
+	
+	//pedir memoria para la estructura genérica
+	Datagrama *datagrama = (Datagrama*) calloc(1,sizeof(Datagrama));
+		
+	//Direccion(tid)
+	datagrama->tid = dir;
+	datagrama->formato.opcode = OPCODE_DATA;
+	
+	//bajando una capa (tftp)
+	DATA *datos = (DATA*) &(datagrama->formato);
+	
+	//numero de bloque 
+	datos->blockNum = numB;
+	
+	//copiando la informacion 
+	datos->msg = (char*)malloc(sizeof(cha)*strlen(informacion));
+	memcpy(datos->msg,informacion,strlen(informacion));
+	
 	//Convertir la estructura en un arreglo
 	bytesAEnviar = structToArray(datagrama,&paquete);
 	
