@@ -1,7 +1,7 @@
 [Project]
-FileName=pruebacanal.dev
+FileName=Receptor.dev
 Name=pruebacanal
-UnitCount=1
+UnitCount=3
 Type=1
 Ver=2
 ObjFiles=
@@ -26,7 +26,7 @@ UseCustomMakefile=0
 CustomMakefile=
 IncludeVersionInfo=0
 SupportXPThemes=0
-CompilerSet=3
+CompilerSet=2
 CompilerSettings=0000000100000000001000000
 LogOutput=
 LogOutputEnabled=0
@@ -51,7 +51,27 @@ AutoIncBuildNr=0
 SyncProduct=0
 
 [Unit1]
-FileName=main.cpp
+FileName=main.c
+CompileCpp=1
+Folder=pruebacanal
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit3]
+FileName=tftp.c
+CompileCpp=1
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit2]
+FileName=tftp.h
 CompileCpp=1
 Folder=pruebacanal
 Compile=1

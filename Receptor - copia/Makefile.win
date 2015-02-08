@@ -4,8 +4,8 @@
 CPP      = g++.exe -D__DEBUG__
 CC       = gcc.exe -D__DEBUG__
 WINDRES  = windres.exe
-OBJ      = main.o
-LINKOBJ  = main.o
+OBJ      = main.o tftp.o
+LINKOBJ  = main.o tftp.o
 LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW32/lib" -L"C:/Program Files (x86)/Dev-Cpp/MinGW32/mingw32/lib" -static-libstdc++ -static-libgcc libwsock32.a canalwinpcap.a libwpcap.a  -m32 -g3
 INCS     = -I"C:/Program Files (x86)/Dev-Cpp/MinGW32/include"
 CXXINCS  = -I"C:/Program Files (x86)/Dev-Cpp/MinGW32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW32/lib/gcc/mingw32/4.7.2/include/c++"
@@ -24,5 +24,8 @@ clean: clean-custom
 $(BIN): $(OBJ)
 	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)
 
-main.o: main.cpp
-	$(CPP) -c main.cpp -o main.o $(CXXFLAGS)
+main.o: main.c
+	$(CPP) -c main.c -o main.o $(CXXFLAGS)
+
+tftp.o: tftp.c
+	$(CPP) -c tftp.c -o tftp.o $(CXXFLAGS)
