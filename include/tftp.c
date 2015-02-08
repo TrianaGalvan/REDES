@@ -186,7 +186,7 @@ void enviarDATA(int numB,char* informacion,char dir){
 	datos->blockNum = numB;
 	
 	//copiando la informacion 
-	datos->msg = (char*)malloc(sizeof(cha)*strlen(informacion));
+	datos->msg = (char*)malloc(sizeof(char)*strlen(informacion));
 	memcpy(datos->msg,informacion,strlen(informacion));
 	
 	//Convertir la estructura en un arreglo

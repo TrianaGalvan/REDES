@@ -8,25 +8,6 @@ void recibirArchivo(char direccion);
 void copiarArch(char*,int,FILE*);
 int filtroDireccion(char dirA,char dirT);
 
-//Recibe el numero de bloque y el caracter de direccion
-void enviarACK(int,char);
-
-//Recibe el numero de bloque y el arreglo que contiene la informacion del archivo 
-void enviarDATA(int,char*);
-
-//recibe el error de codigo y el error que sucedio(cadena) 
-void enviarERROR(int,char*);
-
-//recibe el caracter de direccion y el nombre del archivo 
-void enviarRRQ(char ,char*);
-
-//recibe el caracter de direccion y el nombre del archivo 
-void enviarWRQ(char ,char*);
-
-//recibe una estructura datagarama que previamente fue creada y recibe el paquete en donde se guardara el array resultante de convertir la estructura 
-//Devuelve el numero de btes del array resultante.
-int  structToArray(Datagrama*,char**);
-
 int main(int argc, char *argv[])
 {
 

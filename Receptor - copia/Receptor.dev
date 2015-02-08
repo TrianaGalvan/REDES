@@ -1,7 +1,7 @@
 [Project]
 FileName=Receptor.dev
 Name=Receptor
-UnitCount=3
+UnitCount=4
 Type=1
 Ver=2
 ObjFiles=
@@ -26,8 +26,8 @@ UseCustomMakefile=0
 CustomMakefile=
 IncludeVersionInfo=0
 SupportXPThemes=0
-CompilerSet=2
-CompilerSettings=0000000100000000001000000
+CompilerSet=3
+CompilerSettings=0000000100000000000000000
 LogOutput=
 LogOutputEnabled=0
 
@@ -92,6 +92,16 @@ BuildCmd=
 
 [Unit3]
 FileName=..\include\tftp.h
+CompileCpp=1
+Folder=Receptor
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit4]
+FileName=..\include\tftp.c
 CompileCpp=1
 Folder=Receptor
 Compile=1

@@ -70,7 +70,7 @@ void iniciar_timeOut(){
 //pasar mi estructura a un arreglo
 char* structToArray(Datagrama* datagrama){
 	//pedir memoria para mi arreglo
-	RRQ_WRQ *wrq;
+	WRQ *wrq;
 	char *trama;
 
 	trama = (char*)calloc(1,sizeof(Datagrama));
@@ -95,7 +95,7 @@ char* structToArray(Datagrama* datagrama){
 		case OPCODE_RRQ:
 			break;
 		case OPCODE_WRQ:
-			wrq = (RRQ_WRQ*) &(datagrama->formato);
+			wrq = (WRQ*) &(datagrama->formato);
 
 			memcpy(trama+2, wrq->fileName, strlen(wrq->fileName));
 
@@ -189,7 +189,7 @@ void enviarRRQ_WRQ(char direccion ,char* nombreArchivo){
 	datagrama->formato.opcode = OPCODE_WRQ;
 
 	//bajando una capa (tftp)
-	RRQ_WRQ *wrq_rrq = (RRQ_WRQ*) &(datagrama->formato);
+	WRQ *wrq_rrq = (WRQ*) &(datagrama->formato);
 
 	//Llenando el wrq_rrq
 	wrq_rrq->fileName = (char*)malloc(sizeof(char)*strlen(nombreArchivo));

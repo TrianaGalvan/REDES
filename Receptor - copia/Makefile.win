@@ -1,19 +1,17 @@
 # Project: Receptor
 # Makefile created by Dev-C++ 5.7.1
 
-CPP      = g++.exe -D__DEBUG__
-CC       = gcc.exe -D__DEBUG__
+CPP      = g++.exe
+CC       = gcc.exe
 WINDRES  = windres.exe
-
-OBJ      = main.o
-LINKOBJ  = main.o
-LIBS     = -L"C:/Program Files/Dev-Cpp/MinGW64/lib32" -L"C:/Program Files/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib32" -static-libgcc -L"C:/Users/Lalo/Documents/Triana/Redes-repo-chido/REDES/lib" ../lib/canalwinpcap.a ../lib/libwpcap.a ../lib/libwsock32.a -m32 -g3
+OBJ      = main.o ../include/tftp.o
+LINKOBJ  = main.o ../include/tftp.o
+LIBS     = -L"C:/Program Files/Dev-Cpp/MinGW64/lib32" -L"C:/Program Files/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib32" -static-libgcc -L"C:/Users/Lalo/Documents/Triana/Redes-repo-chido/REDES/lib" ../lib/canalwinpcap.a ../lib/libwpcap.a ../lib/libwsock32.a -m32
 INCS     = -I"C:/Program Files/Dev-Cpp/MinGW64/include" -I"C:/Program Files/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.8.1/include" -I"C:/Users/Lalo/Documents/Triana/Redes-repo-chido/REDES/include"
 CXXINCS  = -I"C:/Program Files/Dev-Cpp/MinGW64/include" -I"C:/Program Files/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.8.1/include" -I"C:/Program Files/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.8.1/include/c++" -I"C:/Users/Lalo/Documents/Triana/Redes-repo-chido/REDES/include"
-
 BIN      = Receptor.exe
-CXXFLAGS = $(CXXINCS) -m32 -g3
-CFLAGS   = $(INCS) -m32 -g3
+CXXFLAGS = $(CXXINCS) -m32
+CFLAGS   = $(INCS) -m32
 RM       = rm.exe -f
 
 .PHONY: all all-before all-after clean clean-custom
@@ -29,5 +27,5 @@ $(BIN): $(OBJ)
 main.o: main.c
 	$(CPP) -c main.c -o main.o $(CXXFLAGS)
 
-tftp.o: tftp.c
-	$(CPP) -c tftp.c -o tftp.o $(CXXFLAGS)
+../include/tftp.o: ../include/tftp.c
+	$(CPP) -c ../include/tftp.c -o ../include/tftp.o $(CXXFLAGS)
