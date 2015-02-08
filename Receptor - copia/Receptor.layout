@@ -4,7 +4,13 @@ Focused=0
 [Editor_0]
 Open=1
 Top=1
-CursorCol=15
-CursorRow=95
-TopLine=80
+CursorCol=1
+CursorRow=14
+TopLine=4
 LeftChar=1
+[Editor_1]
+Open=0
+Top=0
+[Editor_2]
+Open=0
+Top=0

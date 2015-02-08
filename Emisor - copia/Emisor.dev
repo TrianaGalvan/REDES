@@ -1,18 +1,18 @@
 [Project]
 FileName=Emisor.dev
-Name=pruebacanal
+Name=Emisor
 UnitCount=3
 Type=1
 Ver=2
 ObjFiles=
-Includes=
-Libs=
+Includes=C:\Users\Lalo\Documents\Triana\Redes-repo-chido\REDES\include
+Libs=C:\Users\Lalo\Documents\Triana\Redes-repo-chido\REDES\lib
 PrivateResource=
 ResourceIncludes=
 MakeIncludes=
 Compiler=
 CppCompiler=
-Linker=libwsock32.a_@@_canalwinpcap.a_@@_libwpcap.a_@@_
+Linker=../lib/canalwinpcap.a_@@_../lib/libwpcap.a_@@_../lib/libwsock32.a_@@_
 IsCpp=1
 Icon=
 ExeOutput=
@@ -21,13 +21,13 @@ OverrideOutput=0
 OverrideOutputName=examen.exe
 HostApplication=
 Folders=
-CommandLine=
+CommandLine=a bmo.bmp
 UseCustomMakefile=0
 CustomMakefile=
 IncludeVersionInfo=0
 SupportXPThemes=0
-CompilerSet=0
-CompilerSettings=0000000100000000001000000
+CompilerSet=5
+CompilerSettings=0000000100000000100000000
 LogOutput=
 LogOutputEnabled=0
 
@@ -51,9 +51,9 @@ AutoIncBuildNr=0
 SyncProduct=0
 
 [Unit3]
-FileName=main.c
+FileName=..\include\tftp.h
 CompileCpp=1
-Folder=
+Folder=pruebacanal
 Compile=1
 Link=1
 Priority=1000
@@ -61,7 +61,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit2]
-FileName=tftp.h
+FileName=..\include\canal.h
 CompileCpp=1
 Folder=pruebacanal
 Compile=1
@@ -71,9 +71,9 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit1]
-FileName=..\..\..\Programa_prac1\Emisor - copia\canal.h
+FileName=main.c
 CompileCpp=1
-Folder=pruebacanal
+Folder=
 Compile=1
 Link=1
 Priority=1000
