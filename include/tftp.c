@@ -72,18 +72,12 @@ int structToArray(Datagrama* datagrama, char** trama){
 			strlenMode = strlen(rrq->mode);
 			
 			memcpy((*trama)+indice,rrq->fileName,strlenFileName);
-			numBytes += strlenFileName;
-			indice += strlenFileName; 	
-		
-			*trama[indice] = 0;
-			numBytes++;
-			indice += 1;
-			
+			numBytes += strlenFileName+1;
+			indice += strlenFileName+1; 	
+				
 			memcpy((*trama)+indice, rrq->mode,strlenMode);
-			numBytes += strlenMode;
-			indice+= strlenMode;
-			
-			*trama[indice] = 0;
+			numBytes += strlenMode+1;
+		
 			
 			break;
 		case OPCODE_WRQ:
@@ -91,18 +85,12 @@ int structToArray(Datagrama* datagrama, char** trama){
 			wrq = (WRQ*) &(datagrama->formato);
 
 			memcpy((*trama)+indice,wrq->fileName,strlen(wrq->fileName));
-			numBytes += strlen(wrq->fileName);
+			numBytes += strlen(wrq->fileName)+1;
+			indice += strlen(wrq->fileName)+1;
 			
-			indice += strlen(wrq->fileName)+1; 
-			*trama[indice] = 0;
-			numBytes++;
-			
-			indice += 1;
 			memcpy((*trama)+indice, wrq->mode, strlen(wrq->mode));
-			numBytes += strlen(wrq->mode);
-	
-			indice+= strlen(wrq->mode)+1;
-			*trama[indice] = 0;
+			numBytes += strlen(wrq->mode)+1;
+			
 			
 			break;
 		case OPCODE_ACK:
