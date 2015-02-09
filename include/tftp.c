@@ -48,12 +48,48 @@ int structToArray(Datagrama* datagrama, char** trama){
 			
 			break;
 		case OPCODE_ERR:
+			ERROR_TRAMA *error;
+			error = (ERROR_TRAMA*) &(datagrama->formato);
+			
+			//copiar codigo de error 
+			memcpy((*trama)+indice, &(error->errorCode), 2);
+			indice+=2;
+			numBytes += 2;
+			
+			//copiar mensaje de error
+			memcpy((*trama)+indice,&(error->errosMsg),strlen(error->errosMsg));
+			numBytes += strlen(error->errosMsg);
+			
 			break;
 		case OPCODE_RRQ:
+			int strlenFileName;
+			int strlenMode;
+			RRQ *rrq;
+			
+			rrq = (RRQ*) &(datagrama->formato);
+			
+			strlenFileName = strlen(rrq->fileName);
+			strlenMode = strlen(rrq->mode);
+			
+			memcpy((*trama)+indice,rrq->fileName,strlenFileName);
+			numBytes += strlenFileName;
+			indice += strlenFileName; 	
+		
+			*trama[indice] = 0;
+			numBytes++;
+			indice += 1;
+			
+			memcpy((*trama)+indice, rrq->mode,strlenMode);
+			numBytes += strlenMode;
+			indice+= strlenMode;
+			
+			*trama[indice] = 0;
+			
 			break;
 		case OPCODE_WRQ:
 			WRQ *wrq;
 			wrq = (WRQ*) &(datagrama->formato);
+
 			memcpy((*trama)+indice,wrq->fileName,strlen(wrq->fileName));
 			numBytes += strlen(wrq->fileName);
 			
