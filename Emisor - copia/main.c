@@ -4,20 +4,14 @@
 #include <windows.h>
 #include "canal.h"
 #include "tftp.h"
+#include "timer_tftp.h"
 #include <errno.h>
 
 #define TAM_BUF 50
 
 int mandarArchivo(char* nombre_archivo,char direccion);
-char* structToArray(Datagrama*);
-void iniciar_timeOut();
-void enviarRRQ_WRQ(char ,char*);
 // Se acabó el tiempo del timer.
-volatile int timeOut = 0;
-
-
-// Función que ejecuta el timer - en otro Hilo
-DWORD WINAPI ThreadFunc(void* data);
+extern volatile int timeOut;
 
 int main(int argc, char *argv[])
 {
@@ -27,6 +21,7 @@ int main(int argc, char *argv[])
 	char *paquete;
 	char bufer[TAM_BUF];
 	char dir;
+	DWORD milisegundos = 5000;
 
 	//verificamos si el numero de argumentos es correcto
 	if(argc < 2){
@@ -40,8 +35,8 @@ int main(int argc, char *argv[])
 	
     inicializar();
 	
-	enviarRRQ_WRQ(dir,nombre);
-	iniciar_timeOut();
+	enviarWRQ(dir,nombre);
+	iniciar_timeOut(milisegundos);
 	while(1){
 		tam  = sizeof(bufer);
 		rx(bufer,&tam);
@@ -61,52 +56,6 @@ int main(int argc, char *argv[])
 	terminar();
 
 	return 0;
-}
-
-void iniciar_timeOut(){
-	// Iniciar el hilo para empezar a contar los 2 segundos	.	
-	HANDLE thread = CreateThread(NULL, 0, ThreadFunc, NULL, 0, NULL);
-}
-//pasar mi estructura a un arreglo
-char* structToArray(Datagrama* datagrama){
-	//pedir memoria para mi arreglo
-	WRQ *wrq;
-	char *trama;
-
-	trama = (char*)calloc(1,sizeof(Datagrama));
-
-
-	if(trama == NULL){
-		perror("Error malloc");
-		printf("\nbien despues de calloc\n");
-	}
-	printf("\ntrama despues del if= %p\n",trama);
-	//direccion
-	trama[0] = datagrama->tid;
-
-	//opcode
-	trama[1] = (char)datagrama->formato.opcode;
-
-	switch(trama[1]){
-		case OPCODE_DATA:
-			break;
-		case OPCODE_ERR:
-			break;
-		case OPCODE_RRQ:
-			break;
-		case OPCODE_WRQ:
-			wrq = (WRQ*) &(datagrama->formato);
-
-			memcpy(trama+2, wrq->fileName, strlen(wrq->fileName));
-
-			memcpy(trama+strlen(wrq->fileName)+2, wrq->mode, strlen(wrq->mode));
-
-			break;
-		case OPCODE_ACK:
-			break;
-	}
-
-	return trama;
 }
 
 
@@ -171,36 +120,3 @@ int mandarArchivo(char* nomA,char dir){
 
 }
 
-DWORD WINAPI ThreadFunc(void* data){	
-		printf("Hola desde el hilo\n");
-		Sleep(5000);
-		// Pedir permisos sobre timeOut;
-		timeOut = 1;
-		return 0;
-}
-
-void enviarRRQ_WRQ(char direccion ,char* nombreArchivo){
-	char* paquete;
-	//pedir memoria para la estructura genérica
-	Datagrama *datagrama = (Datagrama*) calloc(1,sizeof(Datagrama));
-
-	//Direccion(tid)
-	datagrama->tid = direccion;
-	datagrama->formato.opcode = OPCODE_WRQ;
-
-	//bajando una capa (tftp)
-	WRQ *wrq_rrq = (WRQ*) &(datagrama->formato);
-
-	//Llenando el wrq_rrq
-	wrq_rrq->fileName = (char*)malloc(sizeof(char)*strlen(nombreArchivo));
-	strcpy(wrq_rrq->fileName, nombreArchivo);
-
-	wrq_rrq->mode = (char*)malloc(sizeof(char)*strlen(MODE_NETASCII));
-	strcpy(wrq_rrq->mode, MODE_NETASCII);
-
-	//Convertir la estructura en un arreglo
-	paquete = structToArray(datagrama);
-	
-	tx(paquete,100);
-
-}

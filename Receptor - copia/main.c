@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 
 	int leidos,contador=200;
 	char nombre[50];
-	char dir,bufer[500];
+	char dir,bufer[512];
 	int tam;
 	//verificamos que el numero de argumentos sea correcto
 	if(argc <= 1){
@@ -28,7 +28,8 @@ int main(int argc, char *argv[])
 	
 	enviarACK(contACK,dir);
 	while(1){
-		tam = sizeof(bufer);	
+		 tam = sizeof(bufer);	
+		 
 		 rx(bufer,&tam);			
 
 		if(tam > 0){
