@@ -39,7 +39,7 @@ int structToArray(Datagrama* datagrama, char** trama){
 			
 			// Copiar block-num.
 			memcpy((*trama)+indice, &(data->blockNum), sizeof(char)*2);
-			indice += 2;
+			indice += 1;
 			numBytes += 2;
 			
 			// Copiar data

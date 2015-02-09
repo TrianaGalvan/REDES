@@ -25,8 +25,7 @@ int main(int argc, char *argv[])
 	dir = argv[1][0];
 	
 	inicializar();
-	
-	enviarACK(contACK,dir);
+
 	while(1){
 		 tam = sizeof(bufer);	
 		 
@@ -37,7 +36,12 @@ int main(int argc, char *argv[])
 			imprimir(bufer,tam);
 			break;
 		}
+		else if(timeout == 1){
+			printf("El timeout expiro\n");
+			break;
+		}
 	}
+	enviarACK(contACK,dir);
 		
 //	recibirArchivo(dir);
 
