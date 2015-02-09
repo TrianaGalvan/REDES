@@ -50,6 +50,7 @@ struct DATA{
 	u_int16_t opcode;
 	u_int16_t blockNum;
 	char* msg;
+	int longMsg;
 } typedef DATA;
 
 //Paquete ACK 
