@@ -7,6 +7,7 @@
 #include "timer_tftp.h"
 #include <errno.h>
 
+#define TIME_OUT 5000
 #define TAM_BUF 50
 
 int mandarArchivo(char* nombre_archivo,char direccion);
@@ -21,7 +22,6 @@ int main(int argc, char *argv[])
 	char *paquete;
 	char bufer[TAM_BUF];
 	char dir;
-	DWORD milisegundos = 5000;
 
 	//verificamos si el numero de argumentos es correcto
 	if(argc < 2){
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
     inicializar();
 	
 	enviarWRQ(dir,nombre);
-	iniciar_timeOut(milisegundos);
+	iniciar_timeOut(TIME_OUT);
 	while(1){
 		tam  = sizeof(bufer);
 		rx(bufer,&tam);
