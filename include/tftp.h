@@ -50,6 +50,7 @@ struct DATA{
 	u_int16_t opcode;
 	u_int16_t blockNum;
 	char* msg;
+	int longMsg;
 } typedef DATA;
 
 //Paquete ACK 
@@ -69,8 +70,8 @@ struct ERROR_TRAMA{
 //Recibe el numero de bloque y el caracter de direccion
 void enviarACK(int,char);
 
-//Recibe el numero de bloque y el arreglo que contiene la informacion del archivo y la direccion
-void enviarDATA(int,char*,char);
+//Recibe el numero de bloque y el arreglo que contiene la informacion, el tamaño del arreglo de información y la direccion.
+void enviarDATA(int, char*, int, char);
 
 //recibe el error de codigo y el error que sucedio(cadena) y la direccion
 void enviarERROR(int,char*,char);

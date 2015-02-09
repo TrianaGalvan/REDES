@@ -7,10 +7,10 @@
 
 
 //pasar mi estructura a un arreglo
-int structToArray(Datagrama* datagrama,char** trama){
+int structToArray(Datagrama* datagrama, char** trama){
 	//pedir memoria para mi arreglo
 	int numBytes = 0;
-	int indice; 
+	int indice = 0; 
 	
 	*trama = (char*)calloc(1,sizeof(Datagrama));
 
@@ -19,16 +19,33 @@ int structToArray(Datagrama* datagrama,char** trama){
 		perror("Error malloc");
 		printf("\nbien despues de calloc\n");
 	}
-	printf("\ntrama despues del if= %p\n",trama);
-	//direccion
-	*trama[0] = datagrama->tid;
-	numBytes++;	
-	//opcode
-	*trama[1] = (char)datagrama->formato.opcode;
-	numBytes++;
 	
-	switch(*trama[1]){
+	printf("\ntrama despues del if= %p\n",trama);
+	
+	//direccion
+	*trama[indice] = datagrama->tid;
+	indice++;
+	numBytes++;	
+	
+	//opcode
+	memcpy((*trama)+indice, &(datagrama->formato.opcode), 2);
+	indice += 2;
+	numBytes+=2;
+	
+	switch(datagrama->formato.opcode){
 		case OPCODE_DATA:
+			DATA *data;
+			data = (DATA*) &(datagrama->formato);
+			
+			// Copiar block-num.
+			memcpy((*trama)+indice, &(data->blockNum), sizeof(char)*2);
+			indice += 2;
+			numBytes += 2;
+			
+			// Copiar data
+			memcpy((*trama)+indice, data->msg, data->longMsg);
+			numBytes += data->longMsg;
+			
 			break;
 		case OPCODE_ERR:
 			break;
@@ -37,7 +54,6 @@ int structToArray(Datagrama* datagrama,char** trama){
 		case OPCODE_WRQ:
 			WRQ *wrq;
 			wrq = (WRQ*) &(datagrama->formato);
-			indice = 2;	
 			memcpy((*trama)+indice,wrq->fileName,strlen(wrq->fileName));
 			numBytes += strlen(wrq->fileName);
 			
@@ -54,6 +70,12 @@ int structToArray(Datagrama* datagrama,char** trama){
 			
 			break;
 		case OPCODE_ACK:
+			ACK *ack = (ACK*)&(datagrama->formato);
+			
+			// Copiar block num
+			memcpy(((*trama)+indice), &(ack->blockNum), sizeof(char)*2);
+			numBytes += 2;
+			
 			break;
 	}
 
@@ -77,7 +99,7 @@ void enviarACK(int num,char direccion){
 	ack->blockNum = num;
 	
 	//Convertir la estructura en un arreglo
-	tam = structToArray(datagrama,&paquete);
+	tam = structToArray(datagrama, &paquete);
 	
 	tx(paquete,tam);
 	
@@ -168,7 +190,7 @@ void enviarERROR(int errorCode,char* error,char dir){
 
 }
 
-void enviarDATA(int numB,char* informacion,char dir){
+void enviarDATA(int numB, char* informacion, int tamInformacion, char dir){
 	char* paquete;
 	int bytesAEnviar;
 	
@@ -186,12 +208,16 @@ void enviarDATA(int numB,char* informacion,char dir){
 	datos->blockNum = numB;
 	
 	//copiando la informacion 
-	datos->msg = (char*)malloc(sizeof(char)*strlen(informacion));
-	memcpy(datos->msg,informacion,strlen(informacion));
+	size_t tamAlloc = sizeof(char)*tamInformacion;
+	datos->msg = (char*)malloc(tamAlloc);
+	memcpy(datos->msg, informacion, tamAlloc);
+	
+	// Copiar el tamaño de la información
+	datos->longMsg = tamInformacion;
 	
 	//Convertir la estructura en un arreglo
-	bytesAEnviar = structToArray(datagrama,&paquete);
+	bytesAEnviar = structToArray(datagrama, &paquete);
 	
-	tx(paquete,bytesAEnviar);
+	tx(paquete, bytesAEnviar);
 
 }
