@@ -223,3 +223,5 @@ pip-log.txt
 #Dev C
 *.layout
 *.win
+*.dev
+*.out
