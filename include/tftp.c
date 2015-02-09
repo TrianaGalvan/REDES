@@ -28,8 +28,13 @@ int structToArray(Datagrama* datagrama, char** trama){
 	numBytes++;	
 	
 	//opcode
-	memcpy((*trama)+indice, &(datagrama->formato.opcode), 2);
-	indice += 2;
+	char opcode_high = (datagrama->formato.opcode>>8)&0x00FF;
+	char opcode_low = datagrama->formato.opcode & 0x00FF;
+	
+	memcpy((*trama)+indice, &opcode_high, 1);
+	indice++;
+	memcpy((*trama)+indice, &opcode_low, 1);
+	indice ++;
 	numBytes+=2;
 	
 	switch(datagrama->formato.opcode){
@@ -83,6 +88,7 @@ int structToArray(Datagrama* datagrama, char** trama){
 		case OPCODE_WRQ:
 			WRQ *wrq;
 			wrq = (WRQ*) &(datagrama->formato);
+
 
 			memcpy((*trama)+indice,wrq->fileName,strlen(wrq->fileName));
 			numBytes += strlen(wrq->fileName)+1;
