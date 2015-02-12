@@ -20,7 +20,6 @@ int structToArray(Datagrama* datagrama, char** trama){
 		printf("\nbien despues de calloc\n");
 	}
 	
-	printf("\ntrama despues del if= %p\n",trama);
 	
 	//direccion
 	*trama[indice] = datagrama->tid;
@@ -42,9 +41,10 @@ int structToArray(Datagrama* datagrama, char** trama){
 			DATA *data;
 			data = (DATA*) &(datagrama->formato);
 			
+			*trama = (char*)realloc(*trama,500);
 			// Copiar block-num.
 			memcpy((*trama)+indice, &(data->blockNum), sizeof(char)*2);
-			indice += 1;
+			indice += 2;
 			numBytes += 2;
 			
 			// Copiar data
@@ -223,6 +223,7 @@ void enviarERROR(int errorCode,char* error,char dir){
 void enviarDATA(int numB, char* informacion, int tamInformacion, char dir){
 	char* paquete;
 	int bytesAEnviar;
+	int sizeP;
 	
 	//pedir memoria para la estructura genérica
 	Datagrama *datagrama = (Datagrama*) calloc(1,sizeof(Datagrama));
@@ -247,6 +248,7 @@ void enviarDATA(int numB, char* informacion, int tamInformacion, char dir){
 	
 	//Convertir la estructura en un arreglo
 	bytesAEnviar = structToArray(datagrama, &paquete);
+	sizeP = strlen(paquete);
 	
 	tx(paquete, bytesAEnviar);
 

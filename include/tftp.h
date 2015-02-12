@@ -11,6 +11,18 @@ typedef char u_int8_t;
 #define OPCODE_ACK   4
 #define OPCODE_ERR   5
 
+static char err_codes[][33] = {
+	"Undef",
+	"File not found",
+	"Access violation",
+	"Disk full or allocation exceeded",
+	"Illegal TFTP operation",
+	"Unknown transfer ID",
+	"File already exists",
+	"No such user"
+};
+
+
 //mode
 #define MODE_NETASCII "netascii"
 #define MODE_OCTET    "octet"
@@ -27,7 +39,7 @@ struct TFTP_FORMATO{
 
 //Estructura de la trmaa padre a enviar 
 struct Datagrama{
-	char tid; 
+	char tid;
 	TFTP_FORMATO formato;	
 }typedef Datagrama;
 
@@ -71,7 +83,7 @@ struct ERROR_TRAMA{
 void enviarACK(int,char);
 
 //Recibe el numero de bloque y el arreglo que contiene la informacion del archivo y la direccion
-void enviarDATA(int,char*,char);
+void enviarDATA(int,char*,int tamInformacion,char);
 
 //recibe el error de codigo y el error que sucedio(cadena) y la direccion
 void enviarERROR(int,char*,char);
