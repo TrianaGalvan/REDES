@@ -9,7 +9,7 @@
 
 extern volatile int timeOut;
 int contACK = 0;
-int recibirArchivo(char direccion);
+int recibirArchivo(char dirOrigen, char dirDestino);
 void copiarArch(char*,int,FILE*);
 int filtroDireccion(char dirA,char dirT);
 
@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 
 	int leidos,contador=200;
 	char nombre[50];
-	char dir,bufer[512];
+	char dirO,dirD,bufer[512];
 	int tam;
 	//verificamos que el numero de argumentos sea correcto
 	if(argc <= 1){
@@ -26,43 +26,25 @@ int main(int argc, char *argv[])
 		printf("%s direccion",argv[0]);
 		return 1;
 	}
-	//asignando argumentos
-	dir = argv[1][0];
+	//direccion origen 
+	dirO = argv[1][0];
 	
-	inicializar();
+	//direccion destino 
+	dirD = argv[1][2];
 	
-//	while(1){
-//		 tam = sizeof(bufer);	
-//		 
-//		 rx(bufer,&tam);			
-//
-//		if(tam > 0){
-//			printf("tam = %d  bufer = %s\n",tam,bufer);
-//			imprimir(bufer,tam);
-//			break;
-//		}	
-//	
-//	}
-//	enviarACK(contACK,dir);
-//	
+	
+	inicializar();	
 		
-	recibirArchivo(dir);
+	recibirArchivo(dirO,dirD);
 
 	terminar(); 
     system("PAUSE");
     return EXIT_SUCCESS;
 }
-int filtroDireccion(char dirA,char dirT){
-	//verificamos el campo de direccionamiento
-	if(dirA == dirT){
-		//retorna 0 si es igual al campo de direccion
-		return 1;
-	}
-	return 0;
-}
 
 
-int recibirArchivo(char direccion){
+
+int recibirArchivo(char direccionOrigen, char direccionDestino){
 	char bufer[BLOCK_SIZE+19];
 	char buferArch[BLOCK_SIZE];
 	int tam=0;
@@ -99,13 +81,22 @@ int recibirArchivo(char direccion){
 			
 			if(tam > 0 ){
 				printf("tam = %d \n bufer \n  %s\n",tam,bufer);
-				if(reenviando == 0 && tipoTrama == OPCODE_ACK){
-					contACK++;
-					contDATA++;
-					contadorIntentos = 0;
-					reenviando = 0;	
+				//verificar las direcciones 
+				if(bufer[0] == direccionOrigen && bufer[1] == direccionDestino){
+					if(reenviando == 0 && tipoTrama == OPCODE_ACK){
+						contACK++;
+						contDATA++;
+						contadorIntentos = 0;
+						reenviando = 0;	
+					}
+					break;		
 				}
-				break;	
+				//las direcciones no coincidieron 
+				else{
+					//enviar paquete de error 
+					enviarERROR(5,err_codes[5],direccionOrigen,direccionDestino);
+					return 1; 
+				}
 			}
 			else if(timeOut == 1){
 				contadorIntentos++;
@@ -124,7 +115,7 @@ int recibirArchivo(char direccion){
 		
 		switch(bufer[2]){
 			case OPCODE_WRQ:
-				enviarACK(contACK,direccion);
+				enviarACK(contACK,direccionOrigen,direccionDestino);
 				tipoTrama = OPCODE_ACK;
 				break;
 			case OPCODE_DATA:
@@ -136,7 +127,7 @@ int recibirArchivo(char direccion){
 						memcpy(aux,bufer+5,tam-5);
 						copiarArch(aux,tam-5,dFile);
 						
-						enviarACK(contACK,direccion);
+						enviarACK(contACK,direccionOrigen,direccionDestino);
 						fclose(dFile);	
 						return 	0;
 					}
@@ -146,14 +137,14 @@ int recibirArchivo(char direccion){
 						copiarArch(aux,tam-5,dFile);
 						
 						//Enviar siguiente ACK
-						enviarACK(contACK,direccion);
+						enviarACK(contACK,direccionOrigen,direccionDestino);
 							
 					}	
 				}
 				else{
 					//reenviando el ack 
 					reenviando=1;
-					enviarACK(contACK,direccion);
+					enviarACK(contACK,direccionOrigen,direccionDestino);
 				}
 				
 				tipoTrama = OPCODE_ACK;

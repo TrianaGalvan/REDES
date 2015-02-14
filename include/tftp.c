@@ -13,6 +13,9 @@ int structToArray(Datagrama* datagrama, char** trama){
 	int indice = 0; 
 	
 	*trama = (char*)calloc(1,sizeof(Datagrama));
+	memset(*trama,0,sizeof(Datagrama)*1*10);
+	
+	
 
 
 	if(*trama == NULL){
@@ -21,10 +24,17 @@ int structToArray(Datagrama* datagrama, char** trama){
 	}
 	
 	
-	//direccion
-	*trama[indice] = datagrama->tid;
+	//direccion	origen	
+	memcpy((*trama)+indice,&(datagrama->dirOrigen),1);
 	indice++;
-	numBytes++;	
+	imprimirTrama(*trama,indice);
+	
+	//direccion	destino	
+	memcpy((*trama)+indice,&(datagrama->dirDestino),1);
+	indice++;
+	imprimirTrama(*trama,indice);
+	
+	numBytes+=2;	
 	
 	//opcode
 	char opcode_high = (datagrama->formato.opcode>>8)&0x00FF;
@@ -32,8 +42,10 @@ int structToArray(Datagrama* datagrama, char** trama){
 	
 	memcpy((*trama)+indice, &opcode_high, 1);
 	indice++;
+	imprimirTrama(*trama,indice);
 	memcpy((*trama)+indice, &opcode_low, 1);
 	indice ++;
+	imprimirTrama(*trama,indice);
 	numBytes+=2;
 	
 	switch(datagrama->formato.opcode){
@@ -88,14 +100,15 @@ int structToArray(Datagrama* datagrama, char** trama){
 		case OPCODE_WRQ:
 			WRQ *wrq;
 			wrq = (WRQ*) &(datagrama->formato);
-
-
+			
 			memcpy((*trama)+indice,wrq->fileName,strlen(wrq->fileName));
 			numBytes += strlen(wrq->fileName)+1;
 			indice += strlen(wrq->fileName)+1;
+			imprimirTrama(*trama,indice);
 			
 			memcpy((*trama)+indice, wrq->mode, strlen(wrq->mode));
 			numBytes += strlen(wrq->mode)+1;
+			imprimirTrama(*trama,numBytes);
 			
 			
 			break;
@@ -112,14 +125,17 @@ int structToArray(Datagrama* datagrama, char** trama){
 	return numBytes;
 }
 
-void enviarACK(int num,char direccion){
+void enviarACK(int num,char direccionOrigen ,char dirDestino){
 	char* paquete;
 	int tam = 0; 
 	//pedir memoria para la estructura genérica
 	Datagrama *datagrama = (Datagrama*) calloc(1,sizeof(Datagrama));
 
 	//Direccion(tid)
-	datagrama->tid = direccion;
+	datagrama->dirOrigen = direccionOrigen;
+	datagrama->dirDestino = dirDestino;
+	
+	//opcode
 	datagrama->formato.opcode = OPCODE_ACK;
 
 	//bajando una capa (tftp)
@@ -135,14 +151,17 @@ void enviarACK(int num,char direccion){
 	
 }
 
-void enviarWRQ(char direccion ,char* nombreArchivo){
+void enviarWRQ(char direccionOrigen , char direccionDestino ,char* nombreArchivo){
 	char* paquete;
 	//pedir memoria para la estructura genérica
 	Datagrama *datagrama = (Datagrama*) calloc(1,sizeof(Datagrama));
 	int bytesAEnviar;
 
 	//Direccion(tid)
-	datagrama->tid = direccion;
+	datagrama->dirOrigen = direccionOrigen;
+	datagrama->dirDestino = direccionDestino;
+	
+	//opcode
 	datagrama->formato.opcode = OPCODE_WRQ;
 
 	//bajando una capa (tftp)
@@ -158,11 +177,12 @@ void enviarWRQ(char direccion ,char* nombreArchivo){
 	//Convertir la estructura en un arreglo
 	bytesAEnviar = structToArray(datagrama,&paquete);
 	
+	printf("%s\n",paquete);
 	tx(paquete,bytesAEnviar);
 
 }
 
-void enviarRRQ(char direccion ,char* nombreArchivo){
+void enviarRRQ(char dirOrigen ,char dirDestino,char* nombreArchivo){
 	char* paquete;
 	int bytesAEnviar;
 	
@@ -170,7 +190,10 @@ void enviarRRQ(char direccion ,char* nombreArchivo){
 	Datagrama *datagrama = (Datagrama*) calloc(1,sizeof(Datagrama));
 	
 	//Direccion(tid)
-	datagrama->tid = direccion;
+	datagrama->dirOrigen = dirOrigen;
+	datagrama->dirDestino = dirDestino;
+	
+	//opcode
 	datagrama->formato.opcode = OPCODE_RRQ;
 
 	//bajando una capa (tftp)
@@ -190,7 +213,7 @@ void enviarRRQ(char direccion ,char* nombreArchivo){
 
 }
 
-void enviarERROR(int errorCode,char* error,char dir){
+void enviarERROR(int errorCode,char* error,char dirOrigen , char dirDestino){
 	char* paquete;
 	int bytesAEnviar;
 	
@@ -198,7 +221,10 @@ void enviarERROR(int errorCode,char* error,char dir){
 	Datagrama *datagrama = (Datagrama*) calloc(1,sizeof(Datagrama));
 		
 	//Direccion(tid)
-	datagrama->tid = dir;
+	datagrama->dirOrigen = dirOrigen;
+	datagrama->dirDestino = dirDestino;
+	
+	//opcode
 	datagrama->formato.opcode = OPCODE_ERR;
 	
 	//bajando una capa (tftp)
@@ -220,7 +246,7 @@ void enviarERROR(int errorCode,char* error,char dir){
 
 }
 
-void enviarDATA(int numB, char* informacion, int tamInformacion, char dir){
+void enviarDATA(int numB, char* informacion, int tamInformacion, char dirOrigen,char dirDestino){
 	char* paquete;
 	int bytesAEnviar;
 	int sizeP;
@@ -229,7 +255,10 @@ void enviarDATA(int numB, char* informacion, int tamInformacion, char dir){
 	Datagrama *datagrama = (Datagrama*) calloc(1,sizeof(Datagrama));
 		
 	//Direccion(tid)
-	datagrama->tid = dir;
+	datagrama->dirOrigen = dirOrigen;
+	datagrama->dirDestino = dirDestino;
+	
+	//opcode
 	datagrama->formato.opcode = OPCODE_DATA;
 	
 	//bajando una capa (tftp)
@@ -252,4 +281,25 @@ void enviarDATA(int numB, char* informacion, int tamInformacion, char dir){
 	
 	tx(paquete, bytesAEnviar);
 
+}
+
+int filtroDireccion(char dirOrigen,char dirDestino){
+	//verificamos el campo de direccionamiento
+	if(dirOrigen  == dirDestino){
+		//retorna 0 si es igual al campo de direccion
+		return 1;
+	}
+	return 0;
+}
+
+void imprimirTrama(char* trama , int tam){
+	int i;
+	printf("bytes a imprimir: %d\n",tam);
+	for(i = 0; i < tam ; i++){
+		if(i % 16 == 0){
+			printf("\n");
+		}
+		printf("%02X ",trama[i]);
+	}
+	printf("\n");
 }

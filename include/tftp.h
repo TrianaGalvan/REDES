@@ -39,7 +39,8 @@ struct TFTP_FORMATO{
 
 //Estructura de la trmaa padre a enviar 
 struct Datagrama{
-	char tid;
+	char dirOrigen;
+	char dirDestino;
 	TFTP_FORMATO formato;	
 }typedef Datagrama;
 
@@ -79,23 +80,29 @@ struct ERROR_TRAMA{
 	u_int8_t relleno;
 }typedef ERROR_TRAMA;
 
-//Recibe el numero de bloque y el caracter de direccion
-void enviarACK(int,char);
+//Recibe el numero de bloque y el caracter de direccion irigen y direccion destino
+void enviarACK(int,char,char);
 
-//Recibe el numero de bloque y el arreglo que contiene la informacion del archivo y la direccion
-void enviarDATA(int,char*,int tamInformacion,char);
+//Recibe el numero de bloque y el arreglo que contiene la informacion del archivo y la direccion origen y direccion destino
+void enviarDATA(int,char*,int tamInformacion,char,char);
 
-//recibe el error de codigo y el error que sucedio(cadena) y la direccion
-void enviarERROR(int,char*,char);
+//recibe el error de codigo y el error que sucedio(cadena) y la direccion origen y direccion destino
+void enviarERROR(int,char*,char,char);
 
-//recibe el caracter de direccion y el nombre del archivo
-void enviarRRQ(char ,char*);
+//recibe el caracter de direccion origen y direccion destino y el nombre del archivo
+void enviarRRQ(char ,char,char*);
 
-//recibe el caracter de direccion y el nombre del archivo
-void enviarWRQ(char ,char*);
+//recibe el caracter de direccion origen , direccion destino  y el nombre del archivo
+void enviarWRQ(char ,char, char*);
 
 //recibe una estructura datagarama que previamente fue creada y recibe el paquete en donde se guardara el array resultante de convertir la estructura 
 //Devuelve el numero de btes del array resultante.
 int  structToArray(Datagrama*,char**);
 
+//recibe la direccion origen y direcion destino 
+//devuelve uno si las direcciones coinciden y 0 si no coinciden 
+int filtroDireccion(char dirOrigen,char dirDestino);
+
+
+void imprimirTrama(char* trama , int tam);
 

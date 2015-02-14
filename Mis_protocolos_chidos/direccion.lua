@@ -6,14 +6,15 @@ function triana_proto.dissector(buffer,pinfo,tree)
     pinfo.cols.protocol = "Triana"
     
 	local subtree = tree:add(triana_proto,buffer(),"Datos del Protocolo Triana")
-    subtree:add(buffer(0,1), "Tid: " .. buffer(0,1):string())
-    subtree:add(buffer(1,2), "Opcode: " .. buffer(1,2))	
-    subtree:add(buffer(3,2), "Block Number: " .. buffer(3,4))	
+    subtree:add(buffer(0,1), "Direccion origen: " .. buffer(0,1):string())	
+    subtree:add(buffer(1,1), "Direccion destino: " .. buffer(1,1):string())
+    subtree:add(buffer(2,2), "Opcode: " .. buffer(2,2))	
+    subtree:add(buffer(4,2), "Block Number: " .. buffer(4,2))	
 	-- Obtener el tamaño reportado por wirechark
 	--local pktlen = buffer:reported_length_remaining()
 	
 	--subtree:add(buffer:range(2,pktlen-2),"Datos: " .. string.format("%s",buffer:range(2,pktlen-2)))
-	subtree:add(buffer:range(3),"Datos: " .. buffer:range(3):string())
+	subtree:add(buffer:range(6),"Datos: " .. buffer:range(6):string())
     
 end
 -- load the udp.port table
