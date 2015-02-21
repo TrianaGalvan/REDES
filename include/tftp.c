@@ -13,16 +13,11 @@ int structToArray(Datagrama* datagrama, char** trama){
 	int indice = 0; 
 	
 	*trama = (char*)calloc(1,sizeof(Datagrama));
-	memset(*trama,0,sizeof(Datagrama)*1*10);
 	
-	
-
-
 	if(*trama == NULL){
 		perror("Error malloc");
 		printf("\nbien despues de calloc\n");
 	}
-	
 	
 	//direccion	origen	
 	memcpy((*trama)+indice,&(datagrama->dirOrigen),1);
@@ -101,12 +96,12 @@ int structToArray(Datagrama* datagrama, char** trama){
 			WRQ *wrq;
 			wrq = (WRQ*) &(datagrama->formato);
 			
-			memcpy((*trama)+indice,wrq->fileName,strlen(wrq->fileName));
+			memcpy((*trama)+indice,wrq->fileName, (sizeof(char)*strlen(wrq->fileName)));
 			numBytes += strlen(wrq->fileName)+1;
 			indice += strlen(wrq->fileName)+1;
 			imprimirTrama(*trama,indice);
 			
-			memcpy((*trama)+indice, wrq->mode, strlen(wrq->mode));
+			memcpy((*trama)+indice, wrq->mode, (sizeof(char)*strlen(wrq->mode)));
 			numBytes += strlen(wrq->mode)+1;
 			imprimirTrama(*trama,numBytes);
 			
@@ -155,6 +150,7 @@ void enviarWRQ(char direccionOrigen , char direccionDestino ,char* nombreArchivo
 	char* paquete;
 	//pedir memoria para la estructura genérica
 	Datagrama *datagrama = (Datagrama*) calloc(1,sizeof(Datagrama));
+	
 	int bytesAEnviar;
 
 	//Direccion(tid)

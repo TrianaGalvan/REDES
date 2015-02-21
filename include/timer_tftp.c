@@ -5,7 +5,7 @@
 volatile int timeOut;
 void iniciar_timeOut(DWORD milisegundos){
 	
-	unsigned int* ms = (unsigned int*)malloc(sizeof(unsigned int));
+	DWORD* ms = (DWORD*)malloc(sizeof(DWORD));
 	
 	if(ms == NULL){
 		perror("timeout malloc");
@@ -18,7 +18,7 @@ void iniciar_timeOut(DWORD milisegundos){
 
 
 DWORD WINAPI ThreadFunc(void* data){
-		printf("milisegundos hilo %ud:\n", *((unsigned int*)data));
+		printf("milisegundos hilo %ud:\n", *((DWORD*)data));
 		DWORD* milisegundos = (DWORD*)data;
 		Sleep(*milisegundos);
 		// Pedir permisos sobre timeOut;

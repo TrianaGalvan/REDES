@@ -98,6 +98,7 @@ int mandarArchivo(char* nomA,char direccionOrigen, char direccionDestino){
 			if(contadorIntentos != 5){
 				//volver a enviar el WRQ
 				enviarWRQ(direccionOrigen,direccionDestino,nomA);
+				contadorIntentos++;
 			}
 			else{
 				printf("El receptor no contesta la petición\n");
