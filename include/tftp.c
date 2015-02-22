@@ -11,6 +11,8 @@ int structToArray(Datagrama* datagrama, char** trama){
 	//pedir memoria para mi arreglo
 	int numBytes = 0;
 	int indice = 0; 
+	char block_num_high;
+	char block_num_low;
 	
 	*trama = (char*)calloc(1,sizeof(Datagrama));
 	
@@ -22,12 +24,10 @@ int structToArray(Datagrama* datagrama, char** trama){
 	//direccion	origen	
 	memcpy((*trama)+indice,&(datagrama->dirOrigen),1);
 	indice++;
-	imprimirTrama(*trama,indice);
 	
 	//direccion	destino	
 	memcpy((*trama)+indice,&(datagrama->dirDestino),1);
 	indice++;
-	imprimirTrama(*trama,indice);
 	
 	numBytes+=2;	
 	
@@ -37,10 +37,9 @@ int structToArray(Datagrama* datagrama, char** trama){
 	
 	memcpy((*trama)+indice, &opcode_high, 1);
 	indice++;
-	imprimirTrama(*trama,indice);
+	
 	memcpy((*trama)+indice, &opcode_low, 1);
 	indice ++;
-	imprimirTrama(*trama,indice);
 	numBytes+=2;
 	
 	switch(datagrama->formato.opcode){
@@ -49,15 +48,22 @@ int structToArray(Datagrama* datagrama, char** trama){
 			data = (DATA*) &(datagrama->formato);
 			
 			*trama = (char*)realloc(*trama,500);
-			// Copiar block-num.
-			memcpy((*trama)+indice, &(data->blockNum), sizeof(char)*2);
-			indice += 2;
-			numBytes += 2;
+			
+			// Copiar block num
+			block_num_high = (data->blockNum>>8)&0x00FF;
+			block_num_low = data->blockNum & 0x00FF;
+			
+			memcpy((*trama)+indice, &block_num_high, 1);
+			indice++;
+			memcpy((*trama)+indice, &block_num_low, 1);
+			indice ++;
+			numBytes+=2;
 			
 			// Copiar data
 			memcpy((*trama)+indice, data->msg, data->longMsg);
 			numBytes += data->longMsg;
 			
+			printf("numero de bloque: %d\n",data->blockNum);
 			break;
 		case OPCODE_ERR:
 			ERROR_TRAMA *error;
@@ -99,11 +105,9 @@ int structToArray(Datagrama* datagrama, char** trama){
 			memcpy((*trama)+indice,wrq->fileName, (sizeof(char)*strlen(wrq->fileName)));
 			numBytes += strlen(wrq->fileName)+1;
 			indice += strlen(wrq->fileName)+1;
-			imprimirTrama(*trama,indice);
 			
 			memcpy((*trama)+indice, wrq->mode, (sizeof(char)*strlen(wrq->mode)));
 			numBytes += strlen(wrq->mode)+1;
-			imprimirTrama(*trama,numBytes);
 			
 			
 			break;
@@ -111,12 +115,24 @@ int structToArray(Datagrama* datagrama, char** trama){
 			ACK *ack = (ACK*)&(datagrama->formato);
 			
 			// Copiar block num
-			memcpy(((*trama)+indice), &(ack->blockNum), sizeof(char)*2);
-			numBytes += 2;
+			block_num_high = (ack->blockNum>>8)&0x00FF;
+			block_num_low = ack->blockNum & 0x00FF;
+			
+			memcpy((*trama)+indice, &block_num_high, 1);
+			indice++;
+			
+			memcpy((*trama)+indice, &block_num_low, 1);
+			indice ++;
+			numBytes+=2;
+			
+			printf("numero de bloque: %d\n",ack->blockNum);
 			
 			break;
 	}
-
+	if(datagrama->formato.opcode != OPCODE_DATA){
+		imprimirTrama(*trama,numBytes);	
+	}
+	
 	return numBytes;
 }
 
@@ -173,7 +189,6 @@ void enviarWRQ(char direccionOrigen , char direccionDestino ,char* nombreArchivo
 	//Convertir la estructura en un arreglo
 	bytesAEnviar = structToArray(datagrama,&paquete);
 	
-	printf("%s\n",paquete);
 	tx(paquete,bytesAEnviar);
 
 }

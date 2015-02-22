@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 
 //si regresa 1 se mando bien el archivo si regresa 0 hubo error en la lectura.
 int mandarArchivo(char* nomA,char direccionOrigen, char direccionDestino){
-	char bufer[BLOCK_SIZE+8];
+	char bufer[BLOCK_SIZE+9];
 	char buferArch[BLOCK_SIZE];
 	char aux[BLOCK_SIZE];
 	int leidos;
@@ -69,33 +69,40 @@ int mandarArchivo(char* nomA,char direccionOrigen, char direccionDestino){
 
 	//abrir el archivo
 	pFile = fopen(nomA , "rb" );
+	printf("Abriendo archivo %s\n",nomA);
 	
+	printf("Enviando WRQ\n");
 	//Enviar peticion al servidor para escribir 
 	enviarWRQ(direccionOrigen,direccionDestino,nomA);
 	//Empezar el temporizador
 	iniciar_timeOut(TIME_OUT);
 	//Esperar por el ack
 	while(1){
+		printf("Recibiendo trama...\n");
 		tam  = sizeof(bufer);
 		rx(bufer,&tam);
 		
 		if(tam > 0){
+			printf("Si se recibio respuesta\n");
 			//Verificando las direcciones de origen destino y origen 
 			if(bufer[0] == direccionOrigen && bufer[1] == direccionDestino){
-				printf("tam = %d \n bufer \n  %s\n",tam,bufer);
+				printf("Las direcciones coincidieron\n Trama recibida\n");
 				imprimir(bufer,tam);
 				respuestaRecibida = 1;
 				break;	
 			}
 			//no coincidieron las direcciones 
 			else{
+				printf("Las direcciones no coincidieron(enviando error)\n");
 				//enviar un paquete de error y la comunicacion termina
 				enviarERROR(5,err_codes[5],direccionOrigen,direccionDestino);
 				return 1;
 			}
 		}
 		else if(timeOut == 1){
+			printf("Timeout expiro\n");
 			if(contadorIntentos != 5){
+				printf("Reenviando intento numero = %d\n",contadorIntentos);
 				//volver a enviar el WRQ
 				enviarWRQ(direccionOrigen,direccionDestino,nomA);
 				contadorIntentos++;
@@ -113,14 +120,23 @@ int mandarArchivo(char* nomA,char direccionOrigen, char direccionDestino){
 	if(respuestaRecibida == 1){
 		do{
 
-			switch(bufer[2]){
+			switch(bufer[3]){
 				
 				case OPCODE_ACK:
-					//verificar que el siguiente paquete corresponda con el ack y que sea de la direccion destino que se espera
-					if((bufer[3]+1 == contDATA) && filtroDireccion(direccionOrigen,direccionDestino)){
+					printf("Recibiendo ACK %d\n",bufer[5]);
+					imprimirTrama(bufer,tam);
+					//verificar que el siguiente paquete corresponda con el ack
+					contDATA--;
+					printf("Verificando BlockNum contDATA = %d trama = %d %d\n",contDATA,bufer[4],bufer[5]);
+					char parte_baja = contACK & 0x00ff;
+					char parte_alta = (contACK>>8) & 0x00ff;
+					if(parte_baja == bufer[5] && parte_alta == bufer[4]){
+						printf("Numero de bloque coincidio\n");
+						contDATA++;
 						//preparar el paquete de data con los datos leidos del archivo 
 						leidos = fread(buferArch,1,contador,pFile);
 						//verificar fin de transmision 
+						printf("Enviando DATA\n");
 						if(leidos < 512){
 							enviarDATA(contDATA,buferArch,leidos,direccionOrigen,direccionDestino);
 							fclose(pFile);	
@@ -132,6 +148,7 @@ int mandarArchivo(char* nomA,char direccionOrigen, char direccionDestino){
 					
 					}else{
 						reenviando = 1;
+						printf("Reenviando DATA %d\n",contDATA);
 						enviarDATA(contDATA,buferArch,leidos,direccionOrigen,direccionDestino);
 					}
 					
@@ -142,15 +159,15 @@ int mandarArchivo(char* nomA,char direccionOrigen, char direccionDestino){
 			//Esperar respuesta del servidor 
 			iniciar_timeOut(TIME_OUT);
 			while(1){
-		
+				printf("Recibiendo trama...\n");
 				tam = sizeof(bufer);
 				rx(bufer,&tam);
 				
 				if(tam > 0 ){
-					printf("tam = %d \n bufer \n  %s\n",tam,bufer);
-					
+					printf("Trama recibida\n");
 					//verificando direcciones
 					if(bufer[0] == direccionOrigen && bufer[1] == direccionDestino){
+						printf("Las direcciones conincidieron\n");
 						if(reenviando == 0){
 							contACK++;
 							contDATA++;	
@@ -161,6 +178,7 @@ int mandarArchivo(char* nomA,char direccionOrigen, char direccionDestino){
 					}
 					//la direccion no coincidio 
 					else{
+						printf("Las direcciones no coincidieron(mensaje de error)\n");
 						//enviar un paquete de error y temrinar conexion 
 						enviarERROR(5,err_codes[5],direccionOrigen,direccionDestino);
 						return 1;
@@ -169,12 +187,15 @@ int mandarArchivo(char* nomA,char direccionOrigen, char direccionDestino){
 					
 				}
 				else if(timeOut == 1){
+					printf("Timeout expiro\n");
 					contadorIntentos++;
 					//contar cuantas veces se esta reintentando
 					if(contadorIntentos < 3){
+						printf("Intento %d\n",contadorIntentos);
 						continue;
 					}
 					else{
+						printf("Numero de intentos acabados\n");
 						fclose(pFile);	
 						//En ninguno de los intentos se logro enviar 
 						return 1;
@@ -183,10 +204,7 @@ int mandarArchivo(char* nomA,char direccionOrigen, char direccionDestino){
 			}
 		}while(pFile);
 	}
-	else{
-		fclose(pFile);	
-		return 1;
-	}
+
 	//Se cierra el archivo
 	fclose(pFile);	
 	return 0;

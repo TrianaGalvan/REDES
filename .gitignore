@@ -225,3 +225,5 @@ pip-log.txt
 *.win
 *.dev
 *.out
+*.bmp
+Receptor - copia/archivoRecibido.bmp
