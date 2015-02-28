@@ -5,6 +5,7 @@
 #include "canal.h"
 #include "tftp.h"
 #include "timer_tftp.h"
+#include "checksum.h"
 #include <errno.h>
 #define TIME_OUT 5000
 #define TAM_BUF 50
