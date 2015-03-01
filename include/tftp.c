@@ -13,6 +13,7 @@ int structToArray(Datagrama* datagrama, char** trama){
 	int indice = 0; 
 	char block_num_high;
 	char block_num_low;
+	short int check; 
 	
 	*trama = (char*)calloc(1,sizeof(Datagrama));
 	
@@ -43,11 +44,11 @@ int structToArray(Datagrama* datagrama, char** trama){
 	numBytes+=2;
 	
 	switch(datagrama->formato.opcode){
-		case OPCODE_DATA:
+		case OPCODE_DATA:{
 			DATA *data;
 			data = (DATA*) &(datagrama->formato);
 			
-			*trama = (char*)realloc(*trama,500);
+			*trama = (char*)realloc(*trama,502);
 			
 			// Copiar block num
 			block_num_high = (data->blockNum>>8)&0x00FF;
@@ -62,10 +63,16 @@ int structToArray(Datagrama* datagrama, char** trama){
 			// Copiar data
 			memcpy((*trama)+indice, data->msg, data->longMsg);
 			numBytes += data->longMsg;
+			indice += data->longMsg;
+			
+			//calcular checksum 
+			//check = checkSum(data->msg,512);
+			//*((short int*)(trama+indice)) = check;
 			
 			printf("numero de bloque: %d\n",data->blockNum);
 			break;
-		case OPCODE_ERR:
+	}
+		case OPCODE_ERR:{
 			ERROR_TRAMA *error;
 			error = (ERROR_TRAMA*) &(datagrama->formato);
 			
@@ -79,7 +86,8 @@ int structToArray(Datagrama* datagrama, char** trama){
 			numBytes += strlen(error->errosMsg);
 			
 			break;
-		case OPCODE_RRQ:
+		}
+		case OPCODE_RRQ:{
 			int strlenFileName;
 			int strlenMode;
 			RRQ *rrq;
@@ -98,7 +106,9 @@ int structToArray(Datagrama* datagrama, char** trama){
 		
 			
 			break;
-		case OPCODE_WRQ:
+ 		}
+		case OPCODE_WRQ:{
+		
 			WRQ *wrq;
 			wrq = (WRQ*) &(datagrama->formato);
 			
@@ -111,7 +121,9 @@ int structToArray(Datagrama* datagrama, char** trama){
 			
 			
 			break;
-		case OPCODE_ACK:
+		}
+		case OPCODE_ACK:{
+
 			ACK *ack = (ACK*)&(datagrama->formato);
 			
 			// Copiar block num
@@ -128,6 +140,7 @@ int structToArray(Datagrama* datagrama, char** trama){
 			printf("numero de bloque: %d\n",ack->blockNum);
 			
 			break;
+		}
 	}
 	if(datagrama->formato.opcode != OPCODE_DATA){
 		imprimirTrama(*trama,numBytes);	
@@ -291,6 +304,7 @@ void enviarDATA(int numB, char* informacion, int tamInformacion, char dirOrigen,
 	sizeP = strlen(paquete);
 	
 	tx(paquete, bytesAEnviar);
+	
 
 }
 

@@ -4,8 +4,8 @@
 #include <windows.h>
 #include "canal.h"
 #include "tftp.h"
-#include "timer_tftp.h"
 #include "checksum.h"
+#include "timer_tftp.h"
 #include <errno.h>
 #define TIME_OUT 5000
 #define TAM_BUF 50
@@ -86,7 +86,7 @@ int mandarArchivo(char* nomA,char direccionOrigen, char direccionDestino){
 		if(tam > 0){
 			printf("Si se recibio respuesta\n");
 			//Verificando las direcciones de origen destino y origen 
-			if(bufer[0] == direccionOrigen && bufer[1] == direccionDestino){
+			if(bufer[0] == direccionDestino && bufer[1] == direccionOrigen){
 				printf("Las direcciones coincidieron\n Trama recibida\n");
 				imprimir(bufer,tam);
 				respuestaRecibida = 1;
@@ -167,7 +167,7 @@ int mandarArchivo(char* nomA,char direccionOrigen, char direccionDestino){
 				if(tam > 0 ){
 					printf("Trama recibida\n");
 					//verificando direcciones
-					if(bufer[0] == direccionOrigen && bufer[1] == direccionDestino){
+					if(bufer[0] == direccionDestino && bufer[1] == direccionOrigen){
 						printf("Las direcciones conincidieron\n");
 						if(reenviando == 0){
 							contACK++;
