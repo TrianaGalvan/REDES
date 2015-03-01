@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include "tftp.h"
+#include "checksum.h"
 #include "canal.h"
 
 
@@ -66,8 +67,12 @@ int structToArray(Datagrama* datagrama, char** trama){
 			indice += data->longMsg;
 			
 			//calcular checksum 
-			//check = checkSum(data->msg,512);
-			//*((short int*)(trama+indice)) = check;
+			check = checkSum(data->msg,512);
+			printf("checksum en struct to array = %04X",check);
+			*((short int*)(*trama+indice)) = check;
+			numBytes += 2;
+			
+			//imprimirTrama(*trama,numBytes);
 			
 			printf("numero de bloque: %d\n",data->blockNum);
 			break;
@@ -302,6 +307,7 @@ void enviarDATA(int numB, char* informacion, int tamInformacion, char dirOrigen,
 	//Convertir la estructura en un arreglo
 	bytesAEnviar = structToArray(datagrama, &paquete);
 	sizeP = strlen(paquete);
+
 	
 	tx(paquete, bytesAEnviar);
 	

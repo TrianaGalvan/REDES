@@ -46,11 +46,11 @@ int main(int argc, char *argv[])
 
 
 int recibirArchivo(char direccionOrigen, char direccionDestino){
-	char bufer[BLOCK_SIZE+20];
+	char bufer[BLOCK_SIZE+22];
 	char buferArch[BLOCK_SIZE];
 	int tam=0;
 	int abrirArch=0;
-	char aux[BLOCK_SIZE];
+	char aux[BLOCK_SIZE+2];
 	signed long bytes=0;
 	int opcode;
 	int contDATA = 1;
@@ -58,6 +58,7 @@ int recibirArchivo(char direccionOrigen, char direccionDestino){
 	int reenviando = 0;
 	int contadorIntentos = 0;
 	int tipoTrama =0;
+	short int check;
 	//int cont_low;
 	//Apertura del archivo 
 	FILE* dFile;
@@ -82,6 +83,7 @@ int recibirArchivo(char direccionOrigen, char direccionDestino){
 			printf("Esperando respuesta\n");
 			memset(bufer,0,sizeof(char)*BLOCK_SIZE+8);	
 			tam = sizeof(bufer);
+			printf("size of bufer: %d",tam);
 			rx(bufer,&tam);
 			
 			if(tam > 0 ){
@@ -136,36 +138,78 @@ int recibirArchivo(char direccionOrigen, char direccionDestino){
 				//cont_low = contACK&0x0011;
 				//Verificacion de que es el ack que se esta esperando 
 				printf("Recibiendo DATA %d %d\n",bufer[4],bufer[5]);
-				
+				//imprimirTrama(aux,520);
 				printf("Verificando BlockNum contACK = %d trama = %d %d\n",contACK,bufer[4],bufer[5]);	
 				char parte_baja = contACK & 0x00ff;
 				char parte_alta = (contACK>>8) & 0x00ff;
 				if(parte_baja == bufer[5] && parte_alta == bufer[4]){
 				
 					printf("Enviar ACK %d\n",contACK);
-					printf("Copiando al archivo %d bytes\n",tam-6);
+					printf("Copiando al archivo %d bytes\n",tam-8);
 					//verificar si es la ultima transmision 
 					if(tam < 512){
 						printf("Ultimo paquete recibido\n");
 						//le quitamos el opcode y el numero de bloque 
 						memcpy(aux,bufer+6,tam-6);
-						copiarArch(aux,tam-6,dFile);
-						enviarACK(contACK,direccionOrigen,direccionDestino);
-						fclose(dFile);	
-						return 	0;
+						
+						//checksum 
+						printf("Verificando el checksum\n");
+						//imprimiendo trama antes de verificar check 
+						check  = checkSum(aux,514);
+						
+						printf("check = %04X\n",check);
+						printf("check negado = %04X\n",(~check));
+						if((~check) == 0 || check == 0){
+							printf("Checksum correcto\n");
+							printf("Copiando al archivo\n");
+							//quitando los ultimos bytes 
+							copiarArch(aux,tam-8,dFile);
+							enviarACK(contACK,direccionOrigen,direccionDestino);
+							fclose(dFile);	
+							return 	0;
+						}
+						else{
+							contACK--;
+							contDATA--;
+							printf("Reenviando ACK %d\n",contACK);
+							//reenviando el ack 
+							reenviando=1;
+							
+						}
+						
 					}
 					else{
 						//le quitamos el opcode y el numero de bloque 
 						memcpy(aux,bufer+6,tam-6);
-						printf("Copiando al archivo\n");
-						copiarArch(aux,tam-6,dFile);
 						
-						//Enviar siguiente ACK
-						enviarACK(contACK,direccionOrigen,direccionDestino);
-							
-					}	
+						//checksum 
+						printf("Verificando el checksum\n");
+						check  = checkSum(aux,514);
+						printf("check en el receptor= %04X\n",check);
+						printf("check negado = %04X\n",(~check));
+						//verificando el checksum 
+						printf("Check de 512 = %04X\n",checkSum(aux,512));
+						
+						if((~check) == 0 || check == 0) {
+							printf("Checksum correcto\n");
+							printf("Copiando al archivo\n");
+							//quitando los ultimos bytes 
+							copiarArch(aux,tam-8,dFile);
+							//Enviar siguiente ACK
+							enviarACK(contACK,direccionOrigen,direccionDestino);
+						}else{
+							contACK--;
+							contDATA--;
+							printf("Reenviando ACK %d\n",contACK);
+							//reenviando el ack 
+							reenviando=1;
+						
+						}
+					}		
 				}
 				else{
+					contACK--;
+					contDATA--;
 					printf("Reenviando ACK %d\n",contACK);
 					//reenviando el ack 
 					reenviando=1;

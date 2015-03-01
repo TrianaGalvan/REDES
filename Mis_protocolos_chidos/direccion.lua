@@ -63,7 +63,9 @@ function triana_proto.dissector(buffer,pinfo,tree)
     		subtree:add(buffer(1,1), "Direccion destino: " .. buffer(1,1):string())		
 		subtree:add(buffer(2,2), "Opcode DATA: " .. buffer(2,2))
 		subtree:add(buffer(4,2), "Bloque: " .. buffer(4,2):int())
-		subtree:add(buffer:range(6), "Datos: ".. buffer:range(6):string())	
+		tam  = buffer:len() - 8
+		subtree:add(buffer(6,tam), "Datos: ".. buffer(6,tam):string())
+		subtree:add(buffer(tam+6,2), "Checksum: ".. buffer(tam+6,2))
 		end 
 
 	elseif (content == 4) then do

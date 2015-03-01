@@ -125,7 +125,7 @@ int mandarArchivo(char* nomA,char direccionOrigen, char direccionDestino){
 				
 				case OPCODE_ACK:
 					printf("Recibiendo ACK %d\n",bufer[5]);
-					imprimirTrama(bufer,tam);
+					//imprimirTrama(bufer,tam);
 					//verificar que el siguiente paquete corresponda con el ack
 					contDATA--;
 					printf("Verificando BlockNum contDATA = %d trama = %d %d\n",contDATA,bufer[4],bufer[5]);
@@ -191,7 +191,7 @@ int mandarArchivo(char* nomA,char direccionOrigen, char direccionDestino){
 					printf("Timeout expiro\n");
 					contadorIntentos++;
 					//contar cuantas veces se esta reintentando
-					if(contadorIntentos < 3){
+					if(contadorIntentos < 5){
 						printf("Intento %d\n",contadorIntentos);
 						continue;
 					}

@@ -11,7 +11,9 @@ short int checkSum(char * trama,int tam){
 		tramaInt++;
 	}
 	//Eliminando los acarreos y sacandole el complemento  
-	sumaFinal = ~((suma&0x0000FFFF) + (suma>>16));
-	
+	//sumaFinal = ~((suma&0x0000FFFF) + (suma>>16));
+	sumaFinal = ((suma&0x0000FFFF) + (suma>>16)) ^ 0xFFFF;
+	printf("con complemento = %04X\n",sumaFinal);
+	printf("sin complemento = %04X\n",(suma&0x0000FFFF) + (suma>>16));
 	return sumaFinal;
 }
