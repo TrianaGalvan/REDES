@@ -4,4 +4,4 @@
 
 #define TAM_CHECKSUM 2
 
-short int checkSum(char * trama,int tam);
+unsigned short int checkSum(char * trama,int tam);

@@ -14,13 +14,12 @@ int structToArray(Datagrama* datagrama, char** trama){
 	int indice = 0; 
 	char block_num_high;
 	char block_num_low;
-	short int check; 
+	unsigned short int check; 
 	
 	*trama = (char*)calloc(1,sizeof(Datagrama));
 	
 	if(*trama == NULL){
 		perror("Error malloc");
-		printf("\nbien despues de calloc\n");
 	}
 	
 	//direccion	origen	
@@ -67,12 +66,12 @@ int structToArray(Datagrama* datagrama, char** trama){
 			indice += data->longMsg;
 			
 			//calcular checksum 
-			check = checkSum(data->msg,512);
-			printf("checksum en struct to array = %04X",check);
-			*((short int*)(*trama+indice)) = check;
-			numBytes += 2;
+			check = checkSum(data->msg,data->longMsg);
 			
-			//imprimirTrama(*trama,numBytes);
+			printf("checksum en struct to array = %04X\n",check);
+			
+			*((unsigned short int*)(*trama+indice)) = check;
+			numBytes += 2;
 			
 			printf("numero de bloque: %d\n",data->blockNum);
 			break;
@@ -306,8 +305,8 @@ void enviarDATA(int numB, char* informacion, int tamInformacion, char dirOrigen,
 	
 	//Convertir la estructura en un arreglo
 	bytesAEnviar = structToArray(datagrama, &paquete);
-	sizeP = strlen(paquete);
 
+	printf("NumBytes DATA: %d\n", bytesAEnviar);
 	
 	tx(paquete, bytesAEnviar);
 	

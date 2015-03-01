@@ -58,7 +58,7 @@ int recibirArchivo(char direccionOrigen, char direccionDestino){
 	int reenviando = 0;
 	int contadorIntentos = 0;
 	int tipoTrama =0;
-	short int check;
+	unsigned short int check;
 	//int cont_low;
 	//Apertura del archivo 
 	FILE* dFile;
@@ -83,7 +83,7 @@ int recibirArchivo(char direccionOrigen, char direccionDestino){
 			printf("Esperando respuesta\n");
 			memset(bufer,0,sizeof(char)*BLOCK_SIZE+8);	
 			tam = sizeof(bufer);
-			printf("size of bufer: %d",tam);
+			printf("size of bufer: %d\n",tam);
 			rx(bufer,&tam);
 			
 			if(tam > 0 ){
@@ -144,26 +144,26 @@ int recibirArchivo(char direccionOrigen, char direccionDestino){
 				char parte_alta = (contACK>>8) & 0x00ff;
 				if(parte_baja == bufer[5] && parte_alta == bufer[4]){
 				
-					printf("Enviar ACK %d\n",contACK);
-					printf("Copiando al archivo %d bytes\n",tam-8);
 					//verificar si es la ultima transmision 
 					if(tam < 512){
-						printf("Ultimo paquete recibido\n");
+						printf("Ultimo paquete recibido: %d bytes\n", tam-8);
 						//le quitamos el opcode y el numero de bloque 
 						memcpy(aux,bufer+6,tam-6);
 						
 						//checksum 
 						printf("Verificando el checksum\n");
 						//imprimiendo trama antes de verificar check 
-						check  = checkSum(aux,514);
+						check  = checkSum(aux,tam-6);
 						
 						printf("check = %04X\n",check);
 						printf("check negado = %04X\n",(~check));
+						
 						if((~check) == 0 || check == 0){
 							printf("Checksum correcto\n");
-							printf("Copiando al archivo\n");
+							printf("Copiando al archivo %d bytes\n",tam-8);
 							//quitando los ultimos bytes 
 							copiarArch(aux,tam-8,dFile);
+							printf("Enviar ACK %d\n",contACK);
 							enviarACK(contACK,direccionOrigen,direccionDestino);
 							fclose(dFile);	
 							return 	0;
@@ -186,10 +186,8 @@ int recibirArchivo(char direccionOrigen, char direccionDestino){
 						printf("Verificando el checksum\n");
 						check  = checkSum(aux,514);
 						printf("check en el receptor= %04X\n",check);
-						printf("check negado = %04X\n",(~check));
-						//verificando el checksum 
-						printf("Check de 512 = %04X\n",checkSum(aux,512));
 						
+						//verificando el checksum 
 						if((~check) == 0 || check == 0) {
 							printf("Checksum correcto\n");
 							printf("Copiando al archivo\n");
